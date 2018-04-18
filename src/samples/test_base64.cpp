@@ -5,7 +5,7 @@
 using namespace std;
 
 
-int main()
+int main2()
 {
 	const char* src = "中国海军出海演戏abcdedf./=";
 	char* p = new char[1024];

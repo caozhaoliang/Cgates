@@ -1,11 +1,11 @@
 .PHONY:default all 
 BINFILE := Cgates
 
-LIBS := z
+LIBS := z pthread jsoncpp
 
-INCS := ./src ./src/samples/ ./src/common/
+INCS := ./src ./src/samples/ ./src/common/ ./libs/include
 
-LIBPATHS := ./libs
+LIBPATHS := ./libs ./libs/lib
 
 USER_MARCOS := 
 test = 0
@@ -21,11 +21,22 @@ COMMONOBJS = $(patsubst %.cpp,%.o,$(COMMONSRCS))
 
 all:$(BINFILE)
 
-$(BINFILE):$(COMMONOBJS)
+MAIN_VERSION_STRING = "1.0.1"
+MINOR_VERSION_STRING:=$(shell LANG=C git log --oneline -1 2>/dev/null | cut -c1-7)
+version.h:force
+	@echo Generating version.h
+	@echo -e "#ifndef __MYPROJECT_VERSION_H__\n"\
+	"#define __MYPROJECT_VERSION_H__\n"\
+	"#define MAIN_VERSION_STRING \"$(MAIN_VERSION_STRING)\"\n" \
+	"#define MINOR_VERSION_STRING \"$(MINOR_VERSION_STRING)\"\n" \
+	"#endif" >version.h	
+force:
+
+$(BINFILE):version.h $(COMMONOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(addprefix -L,$(LIBPATHS)) $(addprefix -l,$(LIBS))
 
 %.o:%.cpp
 	$(CC) $(FLAGS) $(addprefix -D,$(USER_MARCOS)) $(addprefix -I,$(INCS)) -c $< -o $@
 
 clean :
-	rm -rf $(COMMONOBJS) $(BINFILE)
+	rm -rf $(COMMONOBJS) $(BINFILE) version.h
